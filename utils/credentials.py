@@ -1,22 +1,26 @@
 """Gestión de credenciales del número de teléfono destino utilizando la librería Keyring."""
 
 from __future__ import annotations
+
 import re
 import sys
 import keyring
 from config import KEYRING_SERVICE, KEYRING_PHONE_KEY
 
 
+# ─── PHONE SANITIZATION & NORMALIZATION ───────────────────────────────────────
+
 def normalize_phone(phone: str) -> str:
     """Limpia y valida un número de teléfono, removiendo espacios, guiones y paréntesis."""
-    # Conservar el '+' inicial si existe, y eliminar otros caracteres no numéricos
     has_plus = phone.strip().startswith("+")
     digits = re.sub(r"\D", "", phone)
     if not digits:
         raise ValueError("El número de teléfono ingresado no contiene dígitos válidos.")
-    
+
     return f"+{digits}" if has_plus else digits
 
+
+# ─── KEYRING CRUD OPERATIONS ──────────────────────────────────────────────────
 
 def get_stored_phone() -> str | None:
     """Recupera el número de teléfono almacenado en el llavero del sistema operativo."""
@@ -36,6 +40,7 @@ def store_phone(phone: str) -> str:
         print(f"[Keyring] Número guardado de forma segura en el llavero: {clean_phone}")
     except Exception as e:
         print(f"[Keyring] Error al guardar en el llavero ({e})")
+
     return clean_phone
 
 
@@ -48,6 +53,8 @@ def delete_stored_phone() -> bool:
     except Exception:
         return False
 
+
+# ─── PHONE RESOLUTION FLOW ────────────────────────────────────────────────────
 
 def resolve_target_phone(provided_phone: str | None = None, interactive: bool = True) -> str:
     """Determina el número de destino a utilizar.
@@ -75,10 +82,9 @@ def resolve_target_phone(provided_phone: str | None = None, interactive: bool = 
         if choice in ("", "s", "si", "y", "yes"):
             return stored
 
-    # Si no hay número o el usuario eligió no usar el guardado:
     print("\n[Keyring] Configuración del número de WhatsApp de destino:")
     print("Ejemplo de formato: +5491123456789 o 5491123456789 (incluir código de país)")
-    
+
     while True:
         try:
             user_input = input("Ingresa el número de teléfono: ").strip()

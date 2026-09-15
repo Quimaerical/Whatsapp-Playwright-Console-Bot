@@ -1,16 +1,21 @@
 """Patrón Page Object Model: Clase base para páginas de Playwright."""
 
 from __future__ import annotations
+
 from typing import Any
 from playwright.sync_api import Locator, Page, TimeoutError as PlaywrightTimeoutError
 from config import ELEMENT_TIMEOUT, PAGE_LOAD_TIMEOUT
 
+
+# ─── BASE PAGE OBJECT ─────────────────────────────────────────────────────────
 
 class BasePage:
     """Clase base de Page Object Model que encapsula la interacción con la instancia de Page."""
 
     def __init__(self, page: Page) -> None:
         self.page: Page = page
+
+    # ─── NAVIGATION & WAITING ─────────────────────────────────────────────────
 
     def navigate(self, url: str, wait_until: str = "domcontentloaded", timeout: int = PAGE_LOAD_TIMEOUT) -> None:
         """Navega a la URL especificada esperando el estado de carga indicado."""
@@ -28,6 +33,12 @@ class BasePage:
         except (PlaywrightTimeoutError, Exception):
             return False
 
+    def wait_for_timeout(self, milliseconds: int) -> None:
+        """Pausa la ejecución durante una cantidad determinada de milisegundos."""
+        self.page.wait_for_timeout(milliseconds)
+
+    # ─── INTERACTION & INPUT ──────────────────────────────────────────────────
+
     def click(self, selector: str, timeout: int = ELEMENT_TIMEOUT) -> None:
         """Hace clic sobre el selector indicado."""
         self.page.locator(selector).first.click(timeout=timeout)
@@ -39,7 +50,3 @@ class BasePage:
     def press_key(self, key: str) -> None:
         """Emula la pulsación de una tecla física del teclado."""
         self.page.keyboard.press(key)
-
-    def wait_for_timeout(self, milliseconds: int) -> None:
-        """Pausa la ejecución durante una cantidad determinada de milisegundos."""
-        self.page.wait_for_timeout(milliseconds)

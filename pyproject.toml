@@ -1,15 +1,14 @@
 [project]
-name = "proyecto-2"
+name = "whatsapp-playwright-bot"
 version = "0.1.0"
-description = "Default template for PDM package"
+description = "Bot de automatización de WhatsApp Web con Playwright, PDM, Keyring y patrones de diseño (Builder, POM, Strategy)"
 authors = [
-    {name = "Sebastian Piñango",email = "singingseba@gmail.com"},
+    {name = "Sebastian Piñango"},
 ]
 dependencies = ["playwright>=1.62.0", "keyring>=25.7.0"]
-requires-python = "==3.14.*"
+requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
-
 
 [tool.pdm]
 distribution = false

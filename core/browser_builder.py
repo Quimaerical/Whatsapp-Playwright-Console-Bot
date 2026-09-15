@@ -1,10 +1,13 @@
 """Patrón Builder: Construcción fluida y desacoplada de instancias de navegador y contexto en Playwright."""
 
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
 from playwright.sync_api import Browser, BrowserContext, Page, Playwright
 
+
+# ─── BROWSER BUILDER PATTERN ──────────────────────────────────────────────────
 
 class BrowserBuilder:
     """Builder para configurar y construir instancias de navegador y páginas en Playwright.
@@ -18,8 +21,8 @@ class BrowserBuilder:
         self._browser_type: str = "chromium"
         self._headless: bool = False
         self._slow_mo: int = 500
-        self._storage_state: str | Path | None = None
-        self._user_data_dir: str | Path | None = None
+        self._storage_state: Path | None = None
+        self._user_data_dir: Path | None = None
         self._viewport: dict[str, int] = {"width": 1280, "height": 800}
         self._args: list[str] = [
             "--no-sandbox",
@@ -27,6 +30,8 @@ class BrowserBuilder:
             "--disable-dev-shm-usage",
             "--disable-blink-features=AutomationControlled",
         ]
+
+    # ─── CHAINABLE CONFIGURATORS ──────────────────────────────────────────────
 
     def with_type(self, browser_type: str) -> BrowserBuilder:
         """Define el motor de navegador a utilizar (chromium, firefox, webkit)."""
@@ -45,18 +50,12 @@ class BrowserBuilder:
 
     def with_storage_state(self, path: str | Path | None) -> BrowserBuilder:
         """Define la ruta al archivo JSON de storage_state de Playwright para cargar cookies y almacenamiento."""
-        if path is not None:
-            self._storage_state = Path(path)
-        else:
-            self._storage_state = None
+        self._storage_state = Path(path) if path is not None else None
         return self
 
     def with_user_data_dir(self, path: str | Path | None) -> BrowserBuilder:
         """Define el directorio de perfil persistente para retener IndexedDB y credenciales de sesión."""
-        if path is not None:
-            self._user_data_dir = Path(path)
-        else:
-            self._user_data_dir = None
+        self._user_data_dir = Path(path) if path is not None else None
         return self
 
     def with_viewport(self, width: int, height: int) -> BrowserBuilder:
@@ -68,6 +67,8 @@ class BrowserBuilder:
         """Añade argumentos adicionales de línea de comandos al navegador."""
         self._args.extend(extra_args)
         return self
+
+    # ─── BUILD & INSTANTIATION ────────────────────────────────────────────────
 
     def build(self) -> tuple[Browser | None, BrowserContext, Page]:
         """Construye y devuelve una tupla conteniendo (browser, context, page).
@@ -86,7 +87,6 @@ class BrowserBuilder:
                 slow_mo=self._slow_mo,
                 viewport=self._viewport,
                 args=self._args,
-                # Evita que WhatsApp detecte la automatización como bot obsoleto
                 user_agent=(
                     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
                     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -115,4 +115,5 @@ class BrowserBuilder:
 
         context = browser.new_context(**context_kwargs)
         page = context.new_page()
+
         return browser, context, page

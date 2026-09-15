@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 
+# ─── MESSAGE BUILDER PATTERN ──────────────────────────────────────────────────
+
 class MessageBuilder:
     """Constructor paso a paso del mensaje final a enviar por WhatsApp.
     
@@ -16,6 +18,8 @@ class MessageBuilder:
         self._patterns: list[str] = []
         self._footer: str | None = None
         self._custom_message: str | None = None
+
+    # ─── FLUENT BUILDER METHODS ───────────────────────────────────────────────
 
     def set_status(self, status: str) -> MessageBuilder:
         """Define la línea de estado inicial del mensaje."""
@@ -44,6 +48,8 @@ class MessageBuilder:
         self._custom_message = message.strip()
         return self
 
+    # ─── BUILD & FACTORY ──────────────────────────────────────────────────────
+
     def build(self) -> str:
         """Compila y retorna el mensaje como cadena de texto."""
         if self._custom_message is not None:
@@ -53,6 +59,7 @@ class MessageBuilder:
         message = f"{self._status}\nPatrones utilizados: {patterns_str}."
         if self._footer:
             message += f"\n\n{self._footer}"
+
         return message
 
     @classmethod
@@ -66,4 +73,3 @@ class MessageBuilder:
             .add_pattern("Strategy")
             .build()
         )
-

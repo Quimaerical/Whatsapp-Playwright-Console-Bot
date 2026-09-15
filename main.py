@@ -6,8 +6,10 @@ mediante Page Object Model (LoginPage y ChatPage), la selección de la estrategi
 """
 
 from __future__ import annotations
+
 import argparse
 import os
+import shutil
 import sys
 from playwright.sync_api import sync_playwright
 
@@ -30,11 +32,14 @@ from utils.credentials import (
 from utils.message_builder import MessageBuilder
 
 
+# ─── CONFIGURATION & CLI ARGUMENT PARSING ─────────────────────────────────────
+
 def parse_arguments() -> argparse.Namespace:
     """Parsea argumentos de línea de comandos."""
     parser = argparse.ArgumentParser(
         description="Bot de WhatsApp con Playwright y Patrones de Diseño (Builder, POM, Strategy)."
     )
+
     parser.add_argument(
         "--message",
         "-m",
@@ -70,26 +75,31 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="Borra el número de teléfono guardado en Keyring.",
     )
+
     return parser.parse_args()
 
 
+# ─── SESSION MAINTENANCE ──────────────────────────────────────────────────────
+
 def reset_saved_session() -> None:
-    """Elimina los archivos de sesión guardados."""
+    """Elimina los archivos y directorios de sesión guardados."""
     if STORAGE_STATE_PATH.exists():
         STORAGE_STATE_PATH.unlink()
-        print(f"[Sesión] Archivo {STORAGE_STATE_PATH} eliminado.")
-    if USER_DATA_DIR.exists():
-        import shutil
-        shutil.rmtree(USER_DATA_DIR, ignore_errors=True)
-        print(f"[Sesión] Directorio de sesión {USER_DATA_DIR} eliminado.")
-    print("[Sesión] Sesión reiniciada con éxito.")
+        print(f"[Sesion] Archivo {STORAGE_STATE_PATH} eliminado.")
 
+    if USER_DATA_DIR.exists():
+        shutil.rmtree(USER_DATA_DIR, ignore_errors=True)
+        print(f"[Sesion] Directorio de sesion {USER_DATA_DIR} eliminado.")
+
+    print("[Sesion] Sesion reiniciada con exito.")
+
+
+# ─── MESSAGE RESOLUTION ───────────────────────────────────────────────────────
 
 def resolve_message(cli_message: str | None, interactive: bool = True) -> str:
     """Determina el mensaje a enviar: vía argumento CLI, entrada en terminal o mensaje por defecto."""
     default_msg = MessageBuilder.default_task_message()
 
-    # Si se pasó explícitamente por CLI (--message / -m)
     if cli_message is not None and cli_message.strip():
         clean_msg = cli_message.strip().replace("\\n", "\n")
         print("[Mensaje] Usando mensaje personalizado especificado por argumento CLI.")
@@ -98,19 +108,18 @@ def resolve_message(cli_message: str | None, interactive: bool = True) -> str:
     if not interactive:
         return default_msg
 
-    # Consulta interactiva en terminal
     print("\n[Mensaje por Defecto]:")
     print("----------------------------------------------------------------")
     print(default_msg)
     print("----------------------------------------------------------------")
-    print("¿Deseas enviar este mensaje por defecto?")
-    print("👉 Presiona [Enter] para usar el mensaje por defecto.")
-    print("👉 O escribe a continuación el nuevo mensaje personalizado y presiona [Enter]:")
-    
+    print("Opciones:")
+    print("  - Presiona [Enter] para usar el mensaje por defecto.")
+    print("  - O escribe el nuevo mensaje personalizado y presiona [Enter]:")
+
     try:
         user_input = input("> ").strip()
     except (EOFError, KeyboardInterrupt):
-        print("\nOperación cancelada por el usuario.")
+        print("\nOperacion cancelada por el usuario.")
         sys.exit(0)
 
     if not user_input:
@@ -122,31 +131,32 @@ def resolve_message(cli_message: str | None, interactive: bool = True) -> str:
     return MessageBuilder().set_custom_message(custom_text).build()
 
 
+# ─── MAIN ORCHESTRATION ───────────────────────────────────────────────────────
+
 def main() -> None:
     args = parse_arguments()
 
     print("================================================================")
-    print("      BOT DE WHATSAPP CON PLAYWRIGHT Y PATRONES DE DISEÑO       ")
+    print("      BOT DE WHATSAPP CON PLAYWRIGHT Y PATRONES DE DISENO       ")
     print("================================================================\n")
 
-    # Manejo de reseteos de credenciales si fueron solicitados
     if args.reset_phone:
         delete_stored_phone()
         if not args.phone:
-            print("Número de teléfono reseteado. Saliendo.")
+            print("[Keyring] Numero de telefono reseteado. Finalizando.")
             return
 
     if args.reset_session:
         reset_saved_session()
 
-    # 1. Obtener el número de teléfono mediante Keyring
+    # 1. Gestion de credenciales con Keyring
     try:
         target_phone = resolve_target_phone(args.phone, interactive=True)
     except Exception as err:
-        print(f"[Error] No se pudo resolver el número de destino: {err}")
+        print(f"[Error] No se pudo resolver el numero de destino: {err}")
         sys.exit(1)
 
-    # 2. Construcción del mensaje a enviar aplicando el Patrón Builder
+    # 2. Resolucion del mensaje con Builder Pattern
     message = resolve_message(args.message, interactive=True)
 
     print("\n[Mensaje Final a Enviar]:")
@@ -154,21 +164,21 @@ def main() -> None:
     print(message)
     print("----------------------------------------------------------------\n")
 
-    # 3. Comprobación de persistencia de sesión (storage_state de Playwright)
+    # 3. Comprobacion de persistencia de sesion (storage_state de Playwright)
     session_exists = STORAGE_STATE_PATH.exists()
-    
+
     if session_exists:
-        print(f"[Sesión] ✅ Se encontró sesión previa en: {STORAGE_STATE_PATH}")
-        print("[Sesión] Cargando storage_state existente. Se omitirá el escaneo de QR.")
+        print(f"[Sesion] [OK] Se encontro sesion previa en: {STORAGE_STATE_PATH}")
+        print("[Sesion] Cargando storage_state existente. Se omitira el escaneo de QR.")
     else:
-        print(f"[Sesión] ℹ️ No existe sesión previa en: {STORAGE_STATE_PATH}")
-        print("[Sesión] Primera ejecución: Se abrirá el navegador para escanear el código QR.")
+        print(f"[Sesion] [INFO] No existe sesion previa en: {STORAGE_STATE_PATH}")
+        print("[Sesion] Primera ejecucion: Se abrira el navegador para escanear el codigo QR.")
 
     headless_mode = args.headless if session_exists else False
     if args.headless and not session_exists:
-        print("[Aviso] Se desactivó el modo headless porque se requiere escanear el código QR.")
+        print("[Aviso] Se desactivo el modo headless porque se requiere escanear el codigo QR.")
 
-    # 4. Construcción del navegador aplicando el Patrón Builder (core/browser_builder.py)
+    # 4. Construccion del navegador con BrowserBuilder
     with sync_playwright() as playwright:
         builder = (
             BrowserBuilder(playwright)
@@ -182,32 +192,29 @@ def main() -> None:
         browser, context, page = builder.build()
 
         try:
-            # 5. Page Object Model: Manejo de autenticación con LoginPage
+            # 5. Autenticacion con Page Object Model (LoginPage)
             login_page = LoginPage(page)
             login_page.load()
 
-            # Verificación de sesión activa
             if session_exists:
                 if not login_page.is_logged_in(timeout=15_000):
-                    print("[Sesión] ⚠️ La sesión anterior no fue válida o expiró. Esperando nuevo QR...")
+                    print("[Sesion] [AVISO] La sesion anterior no fue valida o expiro. Esperando nuevo QR...")
                     if not login_page.wait_for_login(timeout=QR_SCAN_TIMEOUT):
-                        print("[Error] No se completó el inicio de sesión. Abortando.")
+                        print("[Error] No se completo el inicio de sesion. Abortando.")
                         return
                     login_page.save_storage_state(STORAGE_STATE_PATH)
                 else:
-                    print("[Sesión] ✅ Sesión confirmada activa.")
+                    print("[Sesion] [OK] Sesion confirmada activa.")
             else:
-                # Primera ejecución: esperar escaneo de QR
                 if not login_page.wait_for_login(timeout=QR_SCAN_TIMEOUT):
-                    print("[Error] No se escaneó el código QR dentro del tiempo permitido.")
+                    print("[Error] No se escaneo el codigo QR dentro del tiempo permitido.")
                     return
-                # Guardar storage_state inmediatamente al autenticar
                 login_page.save_storage_state(STORAGE_STATE_PATH)
 
-            # 6. Page Object Model & Patrón Strategy: Envío de mensaje
+            # 6. Despacho del mensaje con Page Object Model (ChatPage) y Strategy Pattern
             chat_page = ChatPage(page)
             strategy = get_strategy(args.strategy)
-            
+
             success = strategy.execute(
                 chat_page=chat_page,
                 phone=target_phone,
@@ -216,14 +223,14 @@ def main() -> None:
 
             if success:
                 print("\n================================================================")
-                print(" ✅ PROCESO FINALIZADO CON ÉXITO: Mensaje enviado a WhatsApp Web ")
+                print(" [OK] PROCESO FINALIZADO CON EXITO: Mensaje enviado a WhatsApp Web ")
                 print("================================================================")
             else:
                 print("\n================================================================")
-                print(" ❌ ADVERTENCIA: No se pudo confirmar la entrega del mensaje.   ")
+                print(" [ERROR] ADVERTENCIA: No se pudo confirmar la entrega del mensaje. ")
                 print("================================================================")
 
-            # 7. Guardar storage_state actualizado al cerrar
+            # 7. Persistencia final del storage_state
             login_page.save_storage_state(STORAGE_STATE_PATH)
 
         finally:

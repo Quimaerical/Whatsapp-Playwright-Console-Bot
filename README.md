@@ -1,10 +1,10 @@
-# 🤖 Bot de WhatsApp con Playwright y Patrones de Diseño
+# Bot de WhatsApp con Playwright y Patrones de Diseño
 
 Proyecto desarrollado para automatizar el envío de mensajes por **WhatsApp Web** utilizando **Python**, **Playwright** y gestión de dependencias con **PDM**. El diseño del bot aplica rigurosamente 3 patrones de diseño clásicos (**Builder**, **Page Object Model** y **Strategy**), cuenta con **persistencia de sesión** mediante `storage_state` y almacena el número de destino de forma segura usando **Keyring**.
 
 ---
 
-## 🎯 Objetivo de la Tarea
+## Objetivo de la Tarea
 
 Enviar un mensaje automático por WhatsApp Web notificando la culminación del proceso y listando los patrones utilizados:
 
@@ -15,7 +15,7 @@ Patrones utilizados: Builder, Page Object Model, Strategy.
 
 ---
 
-## 📐 Patrones de Diseño Implementados
+## Patrones de Diseño Implementados
 
 Siguiendo la metodología del **Taller RPA 2**, el proyecto se estructura en componentes desacoplados:
 
@@ -47,7 +47,7 @@ Permite intercambiar el mecanismo de envío sin duplicar lógica de despacho ni 
 
 ---
 
-## 🔐 Persistencia de Sesión (storage_state)
+## Persistencia de Sesión (storage_state)
 
 La tarea exige:
 - **Primera ejecución:** Muestra el código QR para ser escaneado con la app de WhatsApp móvil. Al detectar el inicio de sesión, guarda el `storage_state` en `auth/storage_state.json`.
@@ -57,7 +57,7 @@ La tarea exige:
 
 ---
 
-## 🔑 Gestión de Credenciales con Keyring
+## Gestión de Credenciales con Keyring
 
 Para evitar almacenar el número de teléfono en texto plano en el código:
 - Se utiliza la librería **Keyring** (`utils/credentials.py`).
@@ -66,7 +66,7 @@ Para evitar almacenar el número de teléfono en texto plano en el código:
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```text
 proyecto 2/
@@ -102,7 +102,7 @@ proyecto 2/
 
 ---
 
-## 🚀 Requisitos e Instalación
+## Requisitos e Instalación
 
 ### Requisitos Previos
 - Python 3.10 o superior.
@@ -119,7 +119,7 @@ pdm run playwright install chromium
 
 ---
 
-## 💻 Ejecución
+## Ejecución
 
 ### En Windows (Requisito de la Tarea)
 Haz doble clic en el archivo `run_bot.bat` o ejecútalo desde CMD/PowerShell:
@@ -165,7 +165,7 @@ pdm run python main.py --reset-phone
 
 ---
 
-## 🧪 Pruebas Automatizadas
+## Pruebas Automatizadas
 
 El proyecto incluye tests unitarios para validar los builders, las estrategias y la gestión de credenciales con Keyring:
 
@@ -175,13 +175,13 @@ pdm run python -m unittest discover -s tests
 
 ---
 
-## 📋 Cumplimiento de Criterios de Evaluación
+## Cumplimiento de Criterios de Evaluación
 
 | Criterio | Estado | Detalle |
 | :--- | :---: | :--- |
-| **Envío correcto del mensaje** | ✅ | Formato exacto con Builder: *"Tarea finalizada. Patrones utilizados: Builder, Page Object Model, Strategy."* |
-| **Persistencia de sesión** | ✅ | Guarda y carga `auth/storage_state.json`. En la 2da ejecución no solicita escanear el QR. |
-| **Gestión con PDM** | ✅ | `pyproject.toml` y `pdm.lock` con dependencias `playwright` y `keyring`. |
-| **Ejecución con `.bat`** | ✅ | `run_bot.bat` operativo con comando `pause` para no cerrar la consola. |
-| **Uso de Keyring** | ✅ | Número de teléfono almacenado en el llavero del sistema operativo sin texto plano. |
-| **Patrones de Diseño** | ✅ | **Builder** (`BrowserBuilder` / `MessageBuilder`), **POM** (`LoginPage` / `ChatPage`), **Strategy** (`DirectUrlStrategy` / `SearchContactStrategy`). |
+| **Envío correcto del mensaje** | Cumplido | Formato exacto con Builder: *"Tarea finalizada. Patrones utilizados: Builder, Page Object Model, Strategy."* |
+| **Persistencia de sesión** | Cumplido | Guarda y carga `auth/storage_state.json`. En la 2da ejecución no solicita escanear el QR. |
+| **Gestión con PDM** | Cumplido | `pyproject.toml` y `pdm.lock` con dependencias `playwright` y `keyring`. |
+| **Ejecución con `.bat`** | Cumplido | `run_bot.bat` operativo con comando `pause` para no cerrar la consola. |
+| **Uso de Keyring** | Cumplido | Número de teléfono almacenado en el llavero del sistema operativo sin texto plano. |
+| **Patrones de Diseño** | Cumplido | **Builder** (`BrowserBuilder` / `MessageBuilder`), **POM** (`LoginPage` / `ChatPage`), **Strategy** (`DirectUrlStrategy` / `SearchContactStrategy`). |
