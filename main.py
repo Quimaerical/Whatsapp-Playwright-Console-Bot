@@ -36,6 +36,13 @@ def parse_arguments() -> argparse.Namespace:
         description="Bot de WhatsApp con Playwright y Patrones de Diseño (Builder, POM, Strategy)."
     )
     parser.add_argument(
+        "--message",
+        "-m",
+        type=str,
+        default=None,
+        help="Texto personalizado para el mensaje (si no se especifica, usa el mensaje por defecto).",
+    )
+    parser.add_argument(
         "--phone",
         type=str,
         default=None,
@@ -78,6 +85,43 @@ def reset_saved_session() -> None:
     print("[Sesión] Sesión reiniciada con éxito.")
 
 
+def resolve_message(cli_message: str | None, interactive: bool = True) -> str:
+    """Determina el mensaje a enviar: vía argumento CLI, entrada en terminal o mensaje por defecto."""
+    default_msg = MessageBuilder.default_task_message()
+
+    # Si se pasó explícitamente por CLI (--message / -m)
+    if cli_message is not None and cli_message.strip():
+        clean_msg = cli_message.strip().replace("\\n", "\n")
+        print("[Mensaje] Usando mensaje personalizado especificado por argumento CLI.")
+        return MessageBuilder().set_custom_message(clean_msg).build()
+
+    if not interactive:
+        return default_msg
+
+    # Consulta interactiva en terminal
+    print("\n[Mensaje por Defecto]:")
+    print("----------------------------------------------------------------")
+    print(default_msg)
+    print("----------------------------------------------------------------")
+    print("¿Deseas enviar este mensaje por defecto?")
+    print("👉 Presiona [Enter] para usar el mensaje por defecto.")
+    print("👉 O escribe a continuación el nuevo mensaje personalizado y presiona [Enter]:")
+    
+    try:
+        user_input = input("> ").strip()
+    except (EOFError, KeyboardInterrupt):
+        print("\nOperación cancelada por el usuario.")
+        sys.exit(0)
+
+    if not user_input:
+        print("[Mensaje] Usando mensaje por defecto.")
+        return default_msg
+
+    custom_text = user_input.replace("\\n", "\n")
+    print("[Mensaje] Usando mensaje personalizado ingresado en terminal.")
+    return MessageBuilder().set_custom_message(custom_text).build()
+
+
 def main() -> None:
     args = parse_arguments()
 
@@ -103,16 +147,9 @@ def main() -> None:
         sys.exit(1)
 
     # 2. Construcción del mensaje a enviar aplicando el Patrón Builder
-    message = (
-        MessageBuilder()
-        .set_status("Tarea finalizada.")
-        .add_pattern("Builder")
-        .add_pattern("Page Object Model")
-        .add_pattern("Strategy")
-        .build()
-    )
+    message = resolve_message(args.message, interactive=True)
 
-    print("\n[Mensaje a Enviar]:")
+    print("\n[Mensaje Final a Enviar]:")
     print("----------------------------------------------------------------")
     print(message)
     print("----------------------------------------------------------------\n")

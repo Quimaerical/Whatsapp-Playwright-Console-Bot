@@ -44,6 +44,19 @@ class TestMessageBuilder(unittest.TestCase):
         builder = MessageBuilder().add_pattern("Builder").with_footer("Nota adicional.")
         self.assertIn("Nota adicional.", builder.build())
 
+    def test_default_task_message_classmethod(self):
+        expected = (
+            "Tarea finalizada.\n"
+            "Patrones utilizados: Builder, Page Object Model, Strategy."
+        )
+        self.assertEqual(MessageBuilder.default_task_message(), expected)
+
+    def test_custom_message_override(self):
+        custom_text = "Mensaje personalizado desde la terminal."
+        builder = MessageBuilder().set_custom_message(custom_text)
+        self.assertEqual(builder.build(), custom_text)
+
+
 
 class TestBrowserBuilder(unittest.TestCase):
     """Pruebas para verificar el encadenamiento fluido y la configuración de BrowserBuilder."""

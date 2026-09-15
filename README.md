@@ -139,6 +139,12 @@ pdm run python main.py
 
 ### Opciones de Línea de Comandos
 ```bash
+# Enviar un mensaje personalizado directamente por CLI
+pdm run python main.py --message "Hola! Este es un mensaje de prueba personalizado."
+
+# O de forma abreviada con saltos de línea (\n)
+pdm run python main.py -m "Línea 1\nLínea 2"
+
 # Especificar o actualizar el número de destino directamente
 pdm run python main.py --phone +5491123456789
 
@@ -154,6 +160,8 @@ pdm run python main.py --reset-session
 # Eliminar el número guardado en Keyring
 pdm run python main.py --reset-phone
 ```
+
+> **Personalización interactiva en terminal:** Si ejecutas el bot sin el parámetro `--message`, te mostrará el mensaje por defecto en pantalla. Si presionas `Enter`, se enviará el mensaje por defecto. Si escribes un texto nuevo y presionas `Enter`, enviará tu texto personalizado.
 
 ---
 

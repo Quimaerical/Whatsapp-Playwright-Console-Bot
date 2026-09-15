@@ -15,6 +15,7 @@ class MessageBuilder:
         self._status: str = "Tarea finalizada."
         self._patterns: list[str] = []
         self._footer: str | None = None
+        self._custom_message: str | None = None
 
     def set_status(self, status: str) -> MessageBuilder:
         """Define la línea de estado inicial del mensaje."""
@@ -38,10 +39,31 @@ class MessageBuilder:
         self._footer = footer.strip()
         return self
 
+    def set_custom_message(self, message: str) -> MessageBuilder:
+        """Establece directamente un texto personalizado para el mensaje."""
+        self._custom_message = message.strip()
+        return self
+
     def build(self) -> str:
         """Compila y retorna el mensaje como cadena de texto."""
+        if self._custom_message is not None:
+            return self._custom_message
+
         patterns_str = ", ".join(self._patterns)
         message = f"{self._status}\nPatrones utilizados: {patterns_str}."
         if self._footer:
             message += f"\n\n{self._footer}"
         return message
+
+    @classmethod
+    def default_task_message(cls) -> str:
+        """Genera el mensaje por defecto requerido para la tarea."""
+        return (
+            cls()
+            .set_status("Tarea finalizada.")
+            .add_pattern("Builder")
+            .add_pattern("Page Object Model")
+            .add_pattern("Strategy")
+            .build()
+        )
+
