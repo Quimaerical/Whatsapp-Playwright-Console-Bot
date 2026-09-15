@@ -1,0 +1,15 @@
+[project]
+name = "proyecto-2"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Sebastian Piñango",email = "singingseba@gmail.com"},
+]
+dependencies = ["playwright>=1.62.0", "keyring>=25.7.0"]
+requires-python = "==3.14.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
